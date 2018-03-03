@@ -14,13 +14,13 @@ keystone.init({
 
 	'name': 'map-tracks',
 	'brand': 'Map Tracks',
-	
+
 	'less': 'public',
 	'static': 'public',
 	'favicon': 'public/images/cropped-Favicon-32x32.png',
 	'views': 'templates/views',
 	'view engine': 'hbs',
-	
+
 	'custom engine': handlebars.create({
 		layoutsDir: 'templates/views/layouts',
 		partialsDir: 'templates/views/partials',
@@ -28,14 +28,15 @@ keystone.init({
 		helpers: new require('./templates/views/helpers')(),
 		extname: '.hbs'
 	}).engine,
-	
+
 	'auto update': true,
 	'session': true,
 	'auth': true,
 	'user model': 'User',
 	'port': 80,
   'signin redirect': '/usersettings',
-  'signout redirect': '/'
+  'signout redirect': '/',
+	'mongo': 'mongodb://172.17.0.1:3502/map-tracks'
 
 });
 
