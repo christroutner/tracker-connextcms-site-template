@@ -33,7 +33,7 @@ keystone.init({
 	'session': true,
 	'auth': true,
 	'user model': 'User',
-	'port': 3002,
+	'port': 3000,
   'signin redirect': '/usersettings',
   'signout redirect': '/',
 	'mongo': 'mongodb://172.17.0.1:3502/map-tracks'
