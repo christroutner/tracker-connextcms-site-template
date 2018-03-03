@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link href="styles/bootstrap/bootstrap.css" media="all" rel="stylesheet" />
+    
+    
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="row" id="profileRow" hidden>
+        <div class="col-md-2">
+          <img class="img-responsive center-block profileImage" src="" />
+        </div>
+              
+        <div class="col-md-8">
+          <p class="profileAbout"></p>
+        </div>
+        
+        <div class="col-md-2 text-center">
+          <a class="btn btn-primary profileBtn" href="#/">View Profile</a>
+        </div>
+      </div>
+    </div>
+  
+  </body>
+
+  <script src="js/jquery/jquery-1.11.3.min.js"></script>
+  <script src="js/bootstrap/bootstrap-3.3.5.min.js"></script>
+
+  <script type="text/javascript">
+    
+    // Wait until the DOM has loaded before querying the document
+    $(document).ready(function() {
+      //debugger;
+      
+      $.get('/api/users/list', '', function(data) {
+        //debugger;   
+        
+        //Loop through all the user entries.
+        for(var i=0; i < data.user.length; i++) {
+          //Only list profiles that have the publicProfile flag set to true.
+          if(data.user[i].publicProfile) {
+            var userData = data.user[i];
+            var tempRow = $('#profileRow').clone(); //Clone the profile row example.
+            
+            tempRow.attr('id', 'profileRow'+userData._id);
+            
+            tempRow.find('.profileImage').attr('src', userData.avatarUrl);
+            
+            tempRow.find('.profileAbout').text(userData.about);
+            
+            tempRow.find('.profileBtn').attr('href', "/userprofile/"+userData._id);
+            
+            $('#profileRow').parent().append(tempRow);
+            tempRow.prop('hidden', false); //Show the new row.
+          }
+        }
+        
+      });
+      
+    });
+    
+    
+  </script>
+
+</html>

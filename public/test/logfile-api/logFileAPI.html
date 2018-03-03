@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!--
+    <script type="text/javascript"
+       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJSXMXr_4xR7gWMfYb3dAV082sy4eLAMk">
+    </script>
+    <link rel="stylesheet" href="/styles/jquery-ui.min.css">
+    -->
+    <link href="/styles/bootstrap/bootstrap.css" media="all" rel="stylesheet" />
+    
+    
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12">
+          
+        </div>
+      </div>
+    </div>
+    
+    
+  
+  </body>
+
+  <script src="/js/jquery/jquery-1.11.3.min.js"></script>
+  <script src="/js/bootstrap/bootstrap-3.3.5.min.js"></script>
+  <script src="usersettings.js"></script>
+  <!-- <script type="text/javascript" src="js/SPOTMap11.js"></script> -->
+
+  <script type="text/javascript">
+    
+    // GLOBAL VARIABLES
+    var userSettings = getUserSettings();
+    
+    
+    
+    // Wait until the DOM has loaded before querying the document
+    $(document).ready(function() {      
+      debugger;
+
+      $.get('/api/trackinglogfile/'+userSettings.userData+'/'+'110616', '', function(data) {
+        debugger;
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        //debugger;
+        
+        console.error('Error: '+errorThrown+' Server status returned: '+jqXHR.status);
+      });
+      
+    });
+    
+    
+  </script>
+
+</html>

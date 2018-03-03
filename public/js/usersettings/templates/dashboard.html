@@ -1,0 +1,38 @@
+<!--
+<script type="text/javascript"
+   src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJSXMXr_4xR7gWMfYb3dAV082sy4eLAMk">
+</script>
+-->
+<link rel="stylesheet" href="styles/jquery-ui.min.css">
+
+
+<div class="row">
+  <div class="row">
+    <div class="col-md-offset-2 col-md-8">
+      <p>
+        Move the two bars on the slider to select a date range. 
+        The map below will show my GPS breadcrumb trail for that date range. <br><br>
+      </p>
+      <br>
+      <!-- <p id="test">test</p> -->
+      <p>
+        <label for="amount">Date range:</label>
+        <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+      </p>
+      <div id="slider"></div>
+      <br></br>
+
+      <center>
+        <div id="map_canvas" style="width:550px; height:550px; border: 2px solid darkgreen"></div>
+      </center>
+
+    </div>      
+  </div>
+</div>
+
+<br />
+<hr style="border-top: 5px solid #000;" />
+<br />
+
+<div id="mapSettingsView" hidden></div>
+

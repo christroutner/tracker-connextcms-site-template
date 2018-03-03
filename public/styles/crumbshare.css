@@ -1,0 +1,26 @@
+.navbar-default {
+  background-color: #FFF;
+}
+
+.navbar-brand {
+  height: 150px;
+  padding: 0px 30px;
+}
+
+.navbar-brand img {
+  height: 127px;
+}
+
+.navbar-static-top {
+  border-width: 0;
+}
+
+.navbar {
+  margin-bottom: 0;
+}
+
+.horz-space-orange {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  background-color: #f09021;
+}

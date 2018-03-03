@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+
+<html lang="en">
+<head>
+  <title>KeystoneJS User Files API Test Script</title>
+
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+</head>
+<body>
+
+
+  <section>
+    <div class='container'>
+      <div class="row">
+        <div class="col-md-12">
+          <button type="button" class="btn btn-default" onclick="runTest(0)">Run Basic Test</button>
+        </div>
+        
+        <div class="col-md-12" id="testOutput"></div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js" integrity="sha384-0mSbJDEHialfmuBBQP6A4Qrprq5OVfW37PRR3j5ELqxss1yVqOtnepnHVP9aJ7xS" crossorigin="anonymous"></script>
+
+  <script type="text/javascript">
+    
+    //GLOBAL VARIABLES
+    var testObj = {}; //The test object used to compare server results against.
+    var serverModel; //Stores the server model during the first, CREATE test.
+    
+    
+    $(document).ready(function() {
+      //debugger;
+      
+    });
+    
+    //This is an interative function that routes program flow. It is called many times from many different places.
+    function runTest(state) {
+      debugger;
+      
+      switch(state) {
+        
+        //Initialize the test object.
+        case 0:
+          testObj.textArray = [];
+      
+          
+          testObj.textArray.push('a');
+          testObj.textArray.push('b');
+          testObj.textArray.push('c');
+          testObj.textArray.push('d');
+          testObj.textArray.push('e');
+          
+          testObj.author = '583f4ace989a6a1635bada55';
+          testObj.userData = '583f4b21989a6a1635bada59';
+          
+          
+          
+        //Execute the CREATE test.
+        case 10:
+          createTest();
+          break;
+          
+        //Execute the READ test
+        case 20:
+          readTest();
+          break;
+          
+        //UPDATE test
+        case 30:
+          updateTest();
+          break;
+          
+        //Delete test
+        case 40:
+          deleteTest()
+          break;
+          
+        default:
+          console.log('Unexpected state: '+state);
+          break;
+      }
+      
+    
+      
+    }
+    
+    function createTest() {
+      // BEGIN CREATE TEST
+      
+      
+      $.post('/api/userfiles/create', testObj, function(data) {
+        debugger;
+        
+        var thisModel = data.collection;
+        
+        if((thisModel.textArray[0] == 'a') && (thisModel.textArray[4] == 'e')) {
+          $('#testOutput').append('<p>CREATE test passed.</p>');
+        } else {
+          $('#testOutput').append('<p>CREATE test <u>failed</u>.</p>');
+          $('#testOutput').append('<p>Unexpected result!</p>');
+        }
+        
+        //Copy to a global.
+        serverModel = thisModel;
+        
+        runTest(20);
+        
+      }).fail( function(jqxhr, textStatus, error) {
+        //This is the error handler.
+        var msg = 'Error in /api/userfiles/create. Error: '+error;  
+        console.error(msg);
+        
+        $('#testOutput').append('<p>CREATE test <u>failed</u>.</p>');
+        $('#testOutput').append('<p>'+msg+'</p>');
+        debugger;
+      });
+      
+      // END CREATE TEST
+    }
+    
+    
+    function readTest() {
+      debugger;
+      
+      $.get('/api/userfiles/'+serverModel._id, '', function(data) {
+        debugger;
+        
+        var thisModel = data.collection;
+        
+        //Compare each element between the global model and the server model.
+        for(var i = 0; i < testObj.textArray.length; i++) {
+          if(testObj.textArray[i] != thisModel.textArray[i]) {
+            $('#testOutput').append('<p>READ test <u>failed</u>.</p>');
+            $('#testOutput').append('<p>testObj != thisModel </p>');
+            debugger;
+            return;
+          }
+        }
+        
+        $('#testOutput').append('<p>READ test passed.</p>');
+        
+        runTest(30);
+        
+      }).fail( function(jqxhr, textStatus, error) {
+        //This is the error handler.
+        var msg = 'Error in /api/userfiles/get. Error: '+error;  
+        console.error(msg);
+        
+        $('#testOutput').append('<p>GET test <u>failed</u>.</p>');
+        $('#testOutput').append('<p>'+msg+'</p>');
+        debugger;
+      });
+    }
+    
+    function updateTest() {
+      debugger;
+      
+      testObj.textArray[0] = '1';
+      testObj.textArray[2] = '2';
+      testObj.textArray[4] = '3';
+      
+      $.post('/api/userfiles/'+serverModel._id+'/update', testObj, function(data) {
+        debugger;
+        
+        var thisModel = data.collection;
+        
+        //Compare each element between the global model and the server model.
+        for(var i = 0; i < testObj.textArray.length; i++) {
+          if(testObj.textArray[i] != thisModel.textArray[i]) {
+            $('#testOutput').append('<p>UPDATE test <u>failed</u>.</p>');
+            $('#testOutput').append('<p>testObj != thisModel </p>');
+            debugger;
+            return;
+          }
+        }
+        
+        $('#testOutput').append('<p>UPDATE test passed.</p>');
+        
+        runTest(40);
+        
+      }).fail( function(jqxhr, textStatus, error) {
+        //This is the error handler.
+        var msg = 'Error in /api/userfiles/update. Error: '+error;  
+        console.error(msg);
+        
+        $('#testOutput').append('<p>UPDATE test <u>failed</u>.</p>');
+        $('#testOutput').append('<p>'+msg+'</p>');
+        debugger;
+      });
+    }
+    
+    function deleteTest() {
+      debugger;
+      
+      $.get('/api/userfiles/'+serverModel._id+'/remove', '', function(data) {
+        debugger;
+        
+        if(data.success) {
+          $('#testOutput').append('<p>DELETE test passed.</p>');
+        } else {
+          $('#testOutput').append('<p>DELETE test <u>failed</u>.</p>');
+          $('#testOutput').append('<p>success flag is false.</p>');
+        }
+        
+      }).fail( function(jqxhr, textStatus, error) {
+        //This is the error handler.
+        var msg = 'Error in /api/userfiles/remove. Error: '+error;  
+        console.error(msg);
+        
+        $('#testOutput').append('<p>DELETE test <u>failed</u>.</p>');
+        $('#testOutput').append('<p>'+msg+'</p>');
+        debugger;
+      });
+    }
+    
+    // BEGIN UTILITY FUNCTIONS
+    
+    //This function takes a JavaScript object as an argument and returns it as a JSON string.
+    //Return -1 if failed.
+    function obj2JSON(obj) {
+      try {
+        var str = JSON.stringify(obj);
+        return str;
+      } catch(err) {
+        console.error(err);
+        debugger;
+        return -1;
+      }
+    }
+    
+    //This function takes a JSON string and returns it as a JavaScript object.
+    //Returns -1 if failed.
+    function str2JSON(str) {
+      try {
+        var obj = JSON.parse(str);
+        return obj;  
+      } catch(err) {
+        console.error(err);
+        debugger;
+        return -1;
+      }
+      
+    }
+    
+    // END UTILITY FUNCTIONS
+    
+    
+  </script>
+  
+</body>
+</html>
+ 

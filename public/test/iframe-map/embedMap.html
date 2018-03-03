@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <script type="text/javascript"
+       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBJSXMXr_4xR7gWMfYb3dAV082sy4eLAMk">
+    </script>
+    <link rel="stylesheet" href="/styles/jquery-ui.min.css">
+    <link href="/styles/bootstrap/bootstrap.css" media="all" rel="stylesheet" />
+    
+    
+    
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-offset-2 col-md-8">
+          <p>
+            Move the two bars on the slider to select a date range. 
+            The map below will show my GPS breadcrumb trail for that date range. <br><br>
+          </p>
+          <br>
+          <p id="test">test</p>
+          <p>
+            <label for="amount">Date range:</label>
+            <input type="text" id="amount" readonly style="border:0; color:#f6931f; font-weight:bold;">
+          </p>
+          <div id="slider"></div>
+          <br></br>
+
+          <center>
+            <div id="map_canvas" style="width:550px; height:550px; border: 2px solid darkgreen"></div>
+          </center>
+
+        </div>      
+      </div>
+    </div>
+    
+    <div id="waiting-screen" class="modal bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" data-backdrop="static">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <img src="/images/waiting.gif" class="img-responsive center-block" />
+          <h2 class="text-center">Downloading Log Files and Updating Map...</h2>
+        </div>
+      </div>
+    </div>
+  
+  </body>
+
+  <script src="/js/jquery/jquery-1.11.3.min.js"></script>
+  <script src="/js/jquery/jquery.csv-0.71.js"></script>
+  <script src="/js/jquery/jquery-ui.min.js"></script>
+  <script src="/js/bootstrap/bootstrap-3.3.5.min.js"></script>
+  <script src="usersettings.js"></script>
+  <!-- <script type="text/javascript" src="js/SPOTMap11.js"></script> -->
+
+  <script type="text/javascript">
+    
+    // GLOBAL VARIABLES
+    var userSettings = getUserSettings();
+    //var userId = "57e1a18460390704dc1a10d9";
+    var map;	//global map object
+    
+    var poi_array = new Array();    //Holds Google Map Points-of-Interest    
+    var marker_array = new Array(); //Used to visualize POIs on the Google Map
+    var markerIndex = 0;            //Used to create an array of markers.
+    
+    
+    var GoldenLine = new google.maps.Polyline(); //Breadcrumb trail displayed on Google Map.
+    var xmlMarkerIndex; //Used to store the index of the currently selected marker in marker_array.
+
+    var xmlDoc; //Used to store the XML for the currently selected marker.
+
+    //Dates used for the slider.
+    var EndDate = new Date();   //The right slider value.
+    var StartDate = new Date(); //The left slider value.
+    var MinDate = new Date();   //The smallest value the slider can take.
+    var MaxDate = new Date();   //The largest value the slider can take.
+    var week = 1000*60*60*24*7; //millisecond in one week.
+
+    //Define global variables that I'll use to load data into the map.
+    var geoData = new Array();			//Contains the data read from the CSV file. 
+    var fileIndex = 0;          //Used to track the current log file being used to retrieve the data.
+    
+    
+    
+    // Wait until the DOM has loaded before querying the document
+    $(document).ready(function() {
+      
+      debugger;
+
+      $( "#amount" ).val( "Connecting to server..." );
+
+      //Load the map into the 'map_canvas' div element.
+      var latlng = new google.maps.LatLng(48.555705,-122.960358);
+      var settings = {
+             zoom: 9,
+             center: latlng,
+             mapTypeId: google.maps.MapTypeId.ROADMAP
+      };
+      map = new google.maps.Map(document.getElementById("map_canvas"), settings);
+
+      
+      //Get the file list of available log files from the user data on the server.
+      //$.get('/api/userdata/'+userId, '', function(data) {
+        //debugger;
+        
+        //geoData = data.geodata.fileList;
+        geoData = userSettings.logFiles;
+        
+        initialize();
+      //});
+      
+    });
+    
+    //Initialize the map and add markers.
+    //This function is called by the CSVEvent.
+    function initialize() {
+      debugger;
+      
+      //Retrieve the min and max dates. These are unix time stamps, so I have
+      //to multiply them by 1000 to get a javascript Date value.
+      //Not sure why, but this codes doesn't work unless I call *new* Date.
+      //MinDate = new Date(Number(csvData[0][0])*1000);
+      //MaxDate = new Date(Number(csvData[csvData.length-1][0])*1000);
+      MinDate = new Date(fileNameToDate(geoData[0]));
+      MaxDate = new Date(fileNameToDate(geoData[geoData.length-1]));
+      EndDate = MaxDate;
+      //StartDate = new Date(EndDate - week*2);
+      StartDate = MinDate;
+      
+      //Adjust the start date if it is more than two weeks older than the end date.
+      var oneDay = 1000*60*60*24; //Number of milliseconds in a day.
+      var twoWeeksFromEndDate = new Date(EndDate.getTime()-oneDay*14);
+      if(twoWeeksFromEndDate > StartDate) {
+        StartDate = twoWeeksFromEndDate;
+      }
+      
+      
+      //Update the date range display.
+      $( "#amount" ).val( (StartDate.getMonth()+1) + "/" + StartDate.getDate() + " - " 
+        + (EndDate.getMonth()+1) + "/" + EndDate.getDate() );
+
+      //Initialize the Slider with our new date range.
+      $( "#slider" ).slider({
+        range: true,
+        min: MinDate.getTime()/1000,
+        max: MaxDate.getTime()/1000,
+        values: [StartDate.getTime()/1000, EndDate.getTime()/1000],
+        
+        //This is the function that gets called whenver the slider is changed and the mouse is unclicked.
+        stop: function( event, ui ) {
+
+          //Calculate the new Start and End Dates
+          StartDate = new Date(ui.values[0]*1000);
+          EndDate = new Date(ui.values[1]*1000);
+          
+          //Update the date range display.
+          $( "#amount" ).val( (StartDate.getMonth()+1) + "/" + StartDate.getDate() + " - " 
+            + (EndDate.getMonth()+1) + "/" + EndDate.getDate() );
+
+          //Draw the data points on the map that fall within the new date range.
+          drawmap(StartDate, EndDate);
+        },
+        
+        //This function is called as the slider is changed in real time. It's same as stop, execept it doesn't call drawmap().
+        slide: function( event, ui ) {
+          //debugger;
+          
+          StartDate = new Date(ui.values[0]*1000);
+          EndDate = new Date(ui.values[1]*1000);
+          
+          $( "#amount" ).val((StartDate.getMonth()+1) + "/" + StartDate.getDate() + " - " 
+            + (EndDate.getMonth()+1) + "/" + EndDate.getDate());
+        }
+      });
+
+      //Initialize the map by drawing the data points that fall within the initial date range.
+      drawmap(StartDate, EndDate);
+    }
+    
+    //This function converts a fileName string into a date that the javascript Date.parse() funciton can recognize.
+    function fileNameToDate(fileName) {
+      
+      if(fileName.length != 6) {
+        console.error('Invalid length. File name is longer than 6 characters: '+fileName);
+        return;
+      }
+      
+      var outStr = fileName.slice(0,2)+'-'+fileName.slice(2,4)+'-'+fileName.slice(4,6);
+      var outDate = new Date(outStr);
+      return outDate;
+    }
+    
+    //This function converts a date to a file name that will match those stored in the geoData array.
+    function dateToFileName(inputDate) {
+      //debugger;
+      
+      var month = '00'+(inputDate.getUTCMonth()+1);
+      month = month.slice(-2);
+      
+      var day = '00'+inputDate.getUTCDate();
+      day = day.slice(-2);
+      
+      var year = inputDate.getUTCFullYear().toString();
+      year = year.slice(-2);
+      
+      var outputStr = month+day+year;
+      
+      return outputStr;
+      
+    }
+    
+    //This function draws markers and a polyline based on data within the start
+    //and end dates.
+    function drawmap( StartDateLocal, EndDateLocal ) {
+    
+      //Show the waiting screen.
+      $('#waiting-screen').modal('show');
+      
+      //Remove the markers from the map.
+      for(i = 0; i < marker_array.length; i++) {
+        marker_array[i].setMap(null);
+      }
+      
+      //Remove the polyline from the map.
+      GoldenLine.setMap(null);
+      
+      //Create a new marker array
+      marker_array = new Array(); 
+      poi_array = new Array();
+      markerIndex = 0;
+      
+
+      // Define a symbol using a predefined path (an arrow)
+      // supplied by the Google Maps JavaScript API.
+      //var lineSymbol = {
+      //  path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+      //};
+      
+      //Determine the index of data to retrieve from the server based on the settings of the slider.
+      var oneDay = 1000*60*60*24; //Number of milliseconds in a day.
+      
+      var startIndex = getStartIndexFromDate(StartDateLocal);
+      var stopIndex = getStopIndexFromDate(EndDateLocal);
+      
+      //Error handling.
+      if(startIndex > stopIndex)
+        return;
+      
+      mapLogFile(startIndex, stopIndex);
+   
+    }
+    
+    //This function is used by drawmap() to retrieve the logfile index based on the start date selected by user.
+    //This subfunction is mostly concerned with error handling and ensuring a proper value is returned.
+    function getStopIndexFromDate(inDate) {
+      //debugger;
+      
+      //Determine the index of data to retrieve from the server based on the settings of the slider.
+      var oneDay = 1000*60*60*24; //Number of milliseconds in a day.
+      
+      var stopStr = dateToFileName(inDate);      
+      var stopIndex = geoData.indexOf(stopStr);
+      
+      //Increment the start date until a log file is found that matches.
+      while(stopIndex == -1) {
+        //debugger;
+        
+        //Decrement the selected stop date.
+        var newStopDate = new Date(fileNameToDate(stopStr).getTime() - oneDay);
+        stopStr = dateToFileName(newStopDate);
+        stopIndex = geoData.indexOf(stopStr);
+        
+        //Update the displayed date range
+        $( "#amount" ).val((StartDate.getMonth()+1) + "/" + StartDate.getDate() + " - " 
+            + (newStopDate.getMonth()+1) + "/" + newStopDate.getDate());
+        
+        //Update the slider
+        var sliderVals = $("#slider").slider("values");
+        sliderVals = [sliderVals[0], newStopDate.getTime()/1000];
+        $("#slider").slider("values", sliderVals);
+      }
+      
+      return stopIndex;
+    }
+    
+    //This function is used by drawmap() to retrieve the logfile index based on the start date selected by user.
+    //This subfunction is mostly concerned with error handling and ensuring a proper value is returned.
+    function getStartIndexFromDate(inDate) {
+      //debugger;
+      
+      //Determine the index of data to retrieve from the server based on the settings of the slider.
+      var oneDay = 1000*60*60*24; //Number of milliseconds in a day.
+      
+      var startStr = dateToFileName(inDate);      
+      var startIndex = geoData.indexOf(startStr);
+      
+      //Increment the start date until a log file is found that matches.
+      while(startIndex == -1) {
+        //debugger;
+        
+        //Increment the selected start date.
+        var newStartDate = new Date(fileNameToDate(startStr).getTime() + oneDay);
+        startStr = dateToFileName(newStartDate);
+        startIndex = geoData.indexOf(startStr);
+        
+        //Update the displayed date range
+        $( "#amount" ).val((newStartDate.getMonth()+1) + "/" + newStartDate.getDate() + " - " 
+            + (EndDate.getMonth()+1) + "/" + EndDate.getDate());
+        
+        //Update the slider
+        var sliderVals = $("#slider").slider("values");
+        sliderVals = [newStartDate.getTime()/1000, sliderVals[1]];
+        $("#slider").slider("values", sliderVals);
+      }
+      
+      return startIndex;
+    }
+    
+    //This is a recursive function that retrieves log files from the server and places the data on the map.
+    //It calls itself until all the log files have been retrieved and posted to the map.
+    function mapLogFile(startIndex, stopIndex) {
+      
+      //Syncronize the global fileIndex variable when this function is called the first time.
+      if(startIndex != fileIndex) {
+        //debugger;
+        fileIndex = startIndex;
+      }
+      
+      //Retrieve the data files from the server.
+      $.get(geoData[startIndex]+'.json', '', function(data) {
+        //debugger;
+        
+        //var j = 0; //Index of files to retrieve from the server.
+
+        
+        
+        // Define a symbol using a predefined path (an arrow)
+        // supplied by the Google Maps JavaScript API.
+        var lineSymbol = {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW
+        };
+        
+        for(var i = 0; i < data.features.length; i++) {
+
+          //Only add POI to the map if they fall within the selected date range.
+          //if( (Number(csvData[i][0]) < Number(EndDateLocal)/1000) 
+          // && (Number(csvData[i][0]) > Number(StartDateLocal)/1000) ) {
+
+            //Create an array of Points of Interest Lat and Long coordinates. 
+            //This array is used for creating markers AND the polyline.
+            poi_array[markerIndex] = new google.maps.LatLng(data.features[i].geometry.coordinates[1], data.features[i].geometry.coordinates[0]);
+
+            var timeStamp = new Date(data.features[i].properties.timestamp);
+          
+            // Create a marker for each line item in the CSV file.
+            marker_array[markerIndex] = new google.maps.Marker({
+              position: poi_array[markerIndex], 
+              map: map, 
+              icon: "/images/measle_blue.png",
+              title: timeStamp.toUTCString()
+            });
+
+            //Load the csvData index into the marker object, so the two can reference each other.
+            marker_array[markerIndex].MarkerArrayIndex = i;
+
+            markerIndex++;
+          //}
+
+        }
+
+        
+        //Iteratively call this function until all log files have been processed.
+        if(fileIndex < stopIndex) {
+          fileIndex++;
+          mapLogFile(fileIndex, stopIndex);
+        
+        //Last call of mapLogFile(). Wrap up map. Reinitialize global variables.
+        } else {
+          //debugger;
+          fileIndex = 0;
+          
+          //Create the Polyline
+          GoldenLine = new google.maps.Polyline({
+            path: poi_array,
+            strokeColor: "orange",
+            strokeOpacity: 0.8,
+            strokeWeight: 3,
+            icons: [{
+              icon: lineSymbol,
+              offset: '100%',
+              repeat: '35px'
+            }]
+
+          });
+
+          //Place the Polyline on the map:
+          GoldenLine.setMap(map); 
+
+          //Center the map at the last location.
+          map.setCenter(poi_array[poi_array.length-1]);
+          
+          //Hide the waiting screen.
+           $('#waiting-screen').modal('hide');
+        }
+        
+      })
+      //If the server call fails.
+      .error(function(jqXHR, textStatus, errorThrown) { 
+        debugger;
+        console.error('Error communicating with data log server.');
+      });
+    }
+    
+  </script>
+
+</html>
