@@ -11,9 +11,9 @@ exports = module.exports = function(req, res) {
   //locals.superusers = keystone.get('superusers');
 
   // Set locals
-  locals.section = 'test';
+  locals.section = 'createaccount';
 
   // Render the view
-  view.render('test');
+  view.render('createaccount');
 
 };

@@ -1,0 +1,27 @@
+<div class="container">
+  <div class="row">    
+    <div class="col-md-4">
+      <img class="img-responsive center-block" src="{{data.userprofile.avatarUrl}}" />
+      <br />
+    </div>
+    <div class="col-md-8 jumbotron">
+      <h2>About: {{data.userprofile.name.first}} {{data.userprofile.name.last}}</h2>
+      <p>{{data.userprofile.about}}</p>
+    </div>    
+  </div>
+  
+  <div class="row">
+    <div class="col-md-12">
+      <center>
+        <div class="embed-responsive" style="height: 800px;">
+          <iframe class="embed-responsive-item" src="/uploads/geologs/{{data.userprofile.userData}}/embedMap.html" height="800px"></iframe>
+        </div>
+      </center>
+    </div>      
+  </div>
+  
+</div>
+
+<script type="text/javascript">
+  var user = {{{JSON data.userprofile}}};
+</script>

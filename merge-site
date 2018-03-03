@@ -5,6 +5,8 @@
 
 echo Preparing to copy into myCMS directory...
 
+cp keystone/keystone.js ~/myCMS/
+
 echo Copying Keystone Models
 cp keystone/models/*.js ~/myCMS/models/
 

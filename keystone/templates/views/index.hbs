@@ -1,3 +1,10 @@
+<!--
+<script type="text/javascript">
+  window.location = "/keystone/signin";
+</script>
+-->
+
+
 <style>
   /* Using Handlebars template language, you can insert HTML and styling */
   .features .glyphicon {
@@ -37,26 +44,46 @@
   .show-nav #demo-nav {
     display: block;
   }
-  
-  li {
-    margin: 10px;
-  }
 </style>
 
 <section>
+  
+  <div class="container">
+    
+    <div class='row well well-lg'>
+      <div class='col-md-12'>
+        
+        <h1>Crumb Share</h1>
+        <p class='lead'>
+          CrumbShare.com is a web service that allows people to share their GPS-based breadcrumb 
+          trails. The service interfaces with the <a href="http://rpiovn.org/page/rpi-tracking-device" target="_blank">
+          RPi-Tracker software</a> running on a Raspberry Pi minicomputer. Crumb Share allows
+          you to upload, managed, and display your breadcrumbs on a Google Map. Your personalized
+          map can be shared via social media or embedded on your own blog with one simple line of code. 
+        </p>
+        <p>
+          We are actively looking for beta testers. You can build your own 
+          <a href="http://rpiovn.org/page/rpi-tracking-device" target="_blank">
+          RPi-Tracker</a> or 
+          <a href="http://store.crumbshare.com/rpi-tracking-device/" target="_blank">buy one here</a>.
+        </p>
+        <center>
+          <a class='btn btn-lg btn-primary' href="/createaccount" style="margin: 20px;">Create an Account!</a>
+          <a class='btn btn-lg btn-default' href="/publicProfiles" style="margin: 20px;">View Public Profiles</a>
+        </center>
+        <br>
+        <img class="img-responsive center-block" src='/images/World-Horizontal-Logo.png' alt='RPiOVN Logo' />
+      </div>
+    </div>
+    
+  </div>
+  
+  <!--
   <div class='container'>
     <div class='row well well-lg'>
       <div class='col-md-6'>
-        <h2>You've successfully launched the ConnextCMS Site Template!</h2>
-        <p class='lead'>
-          If you're seeing this, it means you've successfully installed the 
-          <a href="https://github.com/skagitpublishing/site-template-connextcms" target="_blank">site template for ConnextCMS</a>.
-          <ul>
-            <li>You can edit this home page by editing the file <i>keystone/templates/views/index.hbs</i>.</li>
-            <li>You can edit the header and footer of the site by editing the file <i>keystone/templates/views/layouts/default.hbs</i>.</li>
-          </ul> 
-        </p>
-        <br>
+        <h2>ConnextCMS and KeystoneJS Demo</h2>
+        <p class='lead'>ConnextCMS communicates with <a href="http://keystonejs.com/" target="_blank">KeystoneJS</a> via API calls, allowing developers to use front end tools to build their websites.</p><br>
         <p>Log in and try out the back end with the same demo login/pass as in Keystone:</p><br>
         <p>Login: <b>user@keystonejs.com</b></p>
         <p>Pass: <b>admin</b></p>
@@ -82,5 +109,6 @@
     </div>
     
   </div>
+  -->
 </section>
 

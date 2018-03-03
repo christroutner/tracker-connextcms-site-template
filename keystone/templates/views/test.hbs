@@ -1,22 +1,73 @@
+<!--
+<script type="text/javascript">
+  window.location = "/keystone/signin";
+</script>
+-->
 
+
+<style>
+  /* Using Handlebars template language, you can insert HTML and styling */
+  .features .glyphicon {
+    font-size: 32px;
+  }
+
+  .row {
+    margin-bottom: 20px;
+  }
+
+  .quote {
+    background-color: #444;
+    color: #e1e1e1;
+  }
+  .quote blockquote {
+    border: none;
+    margin: 0;
+  }
+  .quote footer {
+    color: #c1c1c1;
+  }
+  section, header {
+    background-color: #fff;
+  }
+  body {
+
+  }
+  .footer {
+    padding: 20px 0;
+  }
+
+
+  #demo-nav {
+    display: none;
+  }
+
+  .show-nav #demo-nav {
+    display: block;
+  }
+</style>
 
 <section>
   <div class='container'>
     <div class='row'>
       <div class="col-sm-12">
-        <p>This is the test page demonstrating how to create a KeystoneJS View in your plugin. This page is publicly accessible.</p>
-        <br>
-        <p>
-          To create a KeystoneJS view like this, you need three components:
-          <ul>
-            <li>The view route definition, which lives in the keystone/routes/views/exampleRouter.js file.</li>
-            <li>The view route handler, which lives in the keystone/routes/views/test.js file.</li>
-            <li>And then the view template, which lives in the keystone/templates/views/test.hbs file.</li>
-          </ul>
-        </p>
+        <p>This is the test page.</p>
       </div>
     </div>
   </div>
   
+  <script type="text/javascript">
+    $(document).ready(function() {
+      debugger;
+      
+      var obj = new Object();
+      obj.email = "chris.troutner@gmail.com";
+      obj.subject = "Test Email";
+      obj.body = "This is a test email sent with mailgun.";
+      
+      $.get('/api/email/test', obj, function(data) {
+        debugger;
+      });
+    });
+  </script>
 </section>
 
